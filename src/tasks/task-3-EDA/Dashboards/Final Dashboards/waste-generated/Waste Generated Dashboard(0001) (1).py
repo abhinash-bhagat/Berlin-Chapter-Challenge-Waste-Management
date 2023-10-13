@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[3]:
-
-
 import pygwalker as pyg
 import pandas as pd
 # pip install sumy
@@ -16,15 +10,7 @@ from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lex_rank import LexRankSummarizer
 
-
-# In[46]:
-
-
 df = pd.read_csv("waste_generated_32161-0001.csv", encoding='ISO-8859-1')
-
-
-# In[47]:
-
 
 df.dropna(inplace = True)
 
@@ -40,9 +26,6 @@ df.dropna(inplace = True)
 # 5.Generated_waste_quantity:  This column quantifies the amount of waste generated for each waste category. It typically represents the quantity of waste in some unit of measurement (e.g., tons, kilograms, cubic meters) that was generated in the specified year and location.
 # 
 # In summary, the dataset provides information about waste generation in Germany, with details on the waste categories (identified by EAV codes), the number of establishments generating each type of waste, and the quantities of waste generated for each category. This data can be used for various purposes, such as environmental analysis, waste management planning, or policy development.
-
-# In[49]:
-
 
 # Tokenize the text data
 vectorizer = CountVectorizer()
@@ -60,16 +43,7 @@ lda = models.LdaModel(corpus, num_topics=30, id2word=id2word, passes=15)
 # Assign topic labels to the original data
 df['Topic_Label'] = [max(lda.get_document_topics(item), key=lambda x: x[1])[0] for item in corpus]
 
-
-
-# In[13]:
-
-
 df['Topic_Label'].unique()
-
-
-# In[50]:
-
 
 num_topics = 30
 for topic_id in range(num_topics):
@@ -79,13 +53,8 @@ for topic_id in range(num_topics):
         print(waste_type)
     print("\n")
 
-
-# In[51]:
-
-
 # Initialize the LexRank summarizer
 summarizer = LexRankSummarizer()
-
 
 category_names = {}
 
@@ -106,26 +75,14 @@ for topic_id in df['Topic_Label'].unique():
 
 df['Category_Name'] = df['Topic_Label'].map(category_names)
 
-
-# In[29]:
-
-
 walker4 = pyg.walk(
     df,
-    spec="./gw0.json",       # this json will save your chart state, you need to click save button in ui mannual when you finish a chart, 'autosave' will be supported in the future.
-    use_kernel_calc=True,    # set `use_kernel_calc=True`, pygwalker will use duckdb as computing engine, it support you explore bigger dataset(<=100GB).
-    use_preview=True,         # set `use_kernel_calc=True`, pygwalker will use duckdb as computing engine, it support you explore bigger dataset(<=100GB).
+    spec="./gw0.json",       
+    use_kernel_calc=True,    
+    use_preview=True,         
 )
 
-
-# In[52]:
-
-
 data = df.loc[:, ['year', 'Topic_Label', 'generated_waste_quantity']]
-
-
-# In[58]:
-
 
 df1 = pd.DataFrame(df)
 topic_label_totals = df.groupby('Category_Name')['generated_waste_quantity'].sum().reset_index()
